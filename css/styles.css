@@ -19,6 +19,7 @@ html {
   width: 40%;
   margin-left: auto;
 }
+
 .movie__poster {
   object-fit: cover;
 }
