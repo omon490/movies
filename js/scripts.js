@@ -1,11 +1,12 @@
+// Har bitta pageda nechta element borligini e'lon qilib olamiz
 var ITEMS_PER_PAGE = 10;
 
+// Funksiyani har joyda ishlay olishi uchun bo'sh array ochib qo'yamiz
 var foundMovies = [];
-
+// titleRegex ga string qiymat kelishini bildirish uchun uni qiymatini bo'sh stringga tenglab qo'yamiz
 var titleRegex = '';
 
-// DOM
-
+// DOM ga oid elementlarni e'lon qilib olamiz
 var elSearchForm = document.querySelector('.js-search-form');
 if (elSearchForm) {
   var elTitleInput = elSearchForm.querySelector('.js-search-form__title-input');
@@ -31,7 +32,7 @@ var elPaginationItemTemplate = document.querySelector('#pagination-item-template
 // FUNCTIONS
 
 // Searching
-
+// Qidiruvga oid funksiyalarni yozib olamiz, ya'ni funksiyamiz uchta property olsin va bizga kinolarni janrlari, ratinglari va categorylari bo'yicha filter qilib bersin, bu funksiya universal emas balki, xos xolatda ishlatsa b o'ladigan funksiya bo'ldi
 var searchMovies = (titleRegex = '', minRating = 0, genre = 'All') => {
   return movies.filter(movie => {
     var doesMatchCategory = genre === 'All' || movie.categories.includes(genre);
@@ -40,7 +41,7 @@ var searchMovies = (titleRegex = '', minRating = 0, genre = 'All') => {
 };
 
 // Sorting
-
+// endi filterlangan kinolarni sort qilib olish uchun funksiya tuzamiz, bunda biz har bir sort uchun funksiya tuzamiz va uni yana bitta funksiyaga joylab olamiz
 var sortMoviesAZ = data => {
   data.sort((a, b) => {
     if (a.title > b.title) {
@@ -79,6 +80,7 @@ var sortMoviesYearAsc = data => {
   data.sort((a, b) => a.year - b.year);
 };
 
+// ana endi tuzilgan 6ta funksiyamizga yana bitta funksiya tuzamiz, lekin bu optimal yo'li emas
 var sortMovies = (data, sortType) => {
   if (sortType === 'az') {
     sortMoviesAZ(data);
@@ -96,7 +98,7 @@ var sortMovies = (data, sortType) => {
 };
 
 // Pagination
-
+// pagination ga oid funksiya tuzamiz, bunda biz funksiyani propertysiga istalgan page bersak bizga shu pageni chiqarib bersin
 var getPage = pageNumber => {
   var startIndex = (pageNumber - 1) * ITEMS_PER_PAGE;
   var endIndex = startIndex + ITEMS_PER_PAGE;
@@ -104,14 +106,13 @@ var getPage = pageNumber => {
 };
 
 
-// DOM GA OID FUNKSIYALAR
-
 /*
   Description: Create movie card element from movie object
   @param movie - object
   @return - HTML element with movie object props included
 */
 
+// movielarni ko'rsatuvchi card yasab olamiz, va unga biz array bersak bizga ularni cardga solib chiqarib bersin
 var createMovieCard = movie => {
   var elMovie = elMovieCardTemplate.cloneNode(true);
 
@@ -125,9 +126,11 @@ var createMovieCard = movie => {
 
   var elMovieTitle = elMovie.querySelector('.movie__title');
 
+  // agar input bo'sh bo'lsa, (?:) shu narsa chiqib qoladi, yani bu hech nima degani, shuning uchun agar bo'sh bo'lsa uning title ga tenglab qo'yildi
   if (titleRegex.source === '(?:)') {
     elMovieTitle.textContent = movie.title;
   } else {
+    // aks holda titlening inner html moviening titleni replace qilingan ko'rinishida va qidirilgan natijani fonini sariq rangda qilib qo'yiladi
     elMovieTitle.innerHTML = movie.title.replace(titleRegex, `<mark class="px-0">${movie.title.match(titleRegex)}</mark>`);
   }
 
@@ -141,6 +144,7 @@ var createMovieCard = movie => {
   @return - null
 */
 
+// kinolarni ko'rsatuvchi funksiya tuzib olamiz
 var displayMovies = movies => {
   elSearchResult.innerHTML = '';
 
@@ -152,7 +156,7 @@ var displayMovies = movies => {
 
   elSearchResult.appendChild(elMoviesFragment);
 };
-
+// paginationlarni ko'rsatuvchi funksiya tuzib olamiz
 var displayPagination = movies => {
   var pagesCount = Math.ceil(movies.length / ITEMS_PER_PAGE);
 
@@ -183,20 +187,22 @@ elSearchForm.addEventListener('submit', evt => {
   var sorting = elSortSelect.value;
 
   foundMovies = searchMovies(titleRegex, minRating, genre);
-  // localStorage.setItem('currentMovies', JSON.stringify(foundMovies));
 
   elNoResultsAlert.classList.add('d-none');
   elSearchResultsCount.textContent = foundMovies.length;
 
   if (!foundMovies.length) {
     elSearchResult.innerHTML = '';
+    elPagination.innerHTML = '';
     elNoResultsAlert.classList.remove('d-none');
+
     return;
   }
 
   sortMovies(foundMovies, sorting);
 
   displayMovies(getPage(1));
+  console.log(foundMovies);
   displayPagination(foundMovies);
 });
 
@@ -211,16 +217,18 @@ elPagination.addEventListener('click', evt => {
 
     elPagination.querySelectorAll('.page-item').forEach(item => {
       item.classList.remove('active');
+      item.querySelector(`a`).classList.remove(`disabled-link`);
     });
 
     // evt.target.parentElement.classList.add('active');
     evt.target.closest('.page-item').classList.add('active');
+    evt.target.classList.add(`disabled-link`);
 
     window.scrollTo(0, 0);
   }
 });
 
-// TODO - qaysi sahifada turgan bo'lsak, o'shaning linki bosilganda ishlamasin
+
 
 
 elSearchResult.addEventListener('click', evt => {

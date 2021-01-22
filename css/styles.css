@@ -65,3 +65,7 @@ mark {
   color: dodgerblue;
   text-decoration: underline; */
 }
+
+.disabled-link {
+  pointer-events: none;
+}
